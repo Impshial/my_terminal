@@ -36,6 +36,8 @@ if (process.env.MYTERMINAL_TEST_DATA)
 const rendererFile = path.resolve(__dirname, '../renderer/index.html');
 let window: BrowserWindow;
 let store: ConfigStore;
+let discoveredShells: ReturnType<typeof discoverShells> | undefined;
+const localShells = () => (discoveredShells ??= discoverShells(store.data.preferences));
 let closing = false;
 let closePrompt = false;
 const manager = new SessionManager((owner, event) => {
@@ -155,7 +157,7 @@ function registerIPC() {
   handle('app:bootstrap', z.undefined(), async () => ({
     profiles: store.publicProfiles(),
     preferences: store.data.preferences,
-    shells: await discoverShells(store.data.preferences),
+    shells: await localShells(),
     warning: store.warning,
     version: app.getVersion(),
   }));
@@ -164,9 +166,7 @@ function registerIPC() {
     'tab:local',
     targetSchema.extend({ shellId: z.string().max(200), cwd: z.string().max(2048).optional() }),
     async (sender, args) => {
-      const shell = (await discoverShells(store.data.preferences)).find(
-        (s) => s.id === args.shellId,
-      );
+      const shell = (await localShells()).find((s) => s.id === args.shellId);
       if (!shell?.available)
         throw new Error(shell?.reason ?? 'This shell is unavailable. Check Settings.');
       if (!(await replacementAllowed(sender, args.id, shell.name)))
@@ -266,6 +266,7 @@ function registerIPC() {
   handle('profiles:forget', targetSchema, (_, { id }) => store.forgetSecret(id));
   handle('preferences:save', preferencesSchema, async (_, preferences) => {
     await store.preferences(preferences);
+    discoveredShells = undefined;
     nativeTheme.themeSource = preferences.appTheme;
     setupMenu();
   });

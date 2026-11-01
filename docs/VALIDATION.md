@@ -12,7 +12,7 @@ Validation is performed on Windows 10 x64. Run the commands in the README to rep
 
 The desktop suite runs against both development files and `release/win-unpacked/MyTerminal.exe`. The Windows installer and portable wrapper are separate output artifacts. Installer wizard installation/uninstallation, Windows 11, and real external SSH/RunPod hosts require the manual checks below.
 
-On this host, Ubuntu is registered but `wsl --status` reports that the WSL 2 kernel file is missing; starting Bash directly also fails. WSL execution therefore remains unverified. MyTerminal checks WSL status and disables affected WSL 2 entries with setup guidance. It does not install or repair the kernel automatically.
+On this host, Ubuntu is registered but its distribution directory is missing, and `wsl --status` also reports a missing WSL 2 kernel. Starting Bash directly fails. WSL execution therefore remains unverified. MyTerminal checks the registration paths and WSL status, disabling affected entries with setup guidance. It does not install or repair WSL automatically.
 
 ## Remaining manual checks
 

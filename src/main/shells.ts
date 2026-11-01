@@ -79,7 +79,31 @@ export async function discoverShells(preferences: Preferences): Promise<ShellOpt
   let distros: string[] = [];
   let wslStatus = { ok: true, output: '' };
   let wslVersions = '';
+  const registrations = new Map<string, { version: number; missingFiles: boolean }>();
   if (wsl) {
+    try {
+      const query =
+        "[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); Get-ChildItem 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss' -ErrorAction SilentlyContinue | Get-ItemProperty | Select-Object DistributionName,BasePath,Version | ConvertTo-Json -Compress";
+      const result = await exec(
+        path.join(windows, 'System32', 'WindowsPowerShell', 'v1.0', 'powershell.exe'),
+        ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command', query],
+        { encoding: 'utf8', timeout: 6000, windowsHide: true, maxBuffer: 65536 },
+      );
+      const parsed = JSON.parse(result.stdout || '[]');
+      for (const entry of Array.isArray(parsed) ? parsed : [parsed]) {
+        if (typeof entry.DistributionName !== 'string' || typeof entry.BasePath !== 'string')
+          continue;
+        let missingFiles = false;
+        try {
+          await access(entry.BasePath);
+        } catch (error: any) {
+          missingFiles = error.code === 'ENOENT';
+        }
+        registrations.set(entry.DistributionName, { version: Number(entry.Version), missingFiles });
+      }
+    } catch {
+      /* Registry inspection is optional; WSL's own listing remains authoritative. */
+    }
     const readWsl = async (args: string[]) => {
       const decode = (b: Buffer | undefined) =>
         b ? b.toString(b.includes(0) ? 'utf16le' : 'utf8').replace(/\u0000|\uFEFF/g, '') : '';
@@ -132,23 +156,28 @@ export async function discoverShells(preferences: Preferences): Promise<ShellOpt
         .find((parts) => parts[0] === distro);
       // A registered WSL 2 distribution may still be unusable if its kernel is missing.
       // WSL 1 remains available even when WSL 2 reports a setup problem.
-      const unavailable = row?.at(-1) === '2' && !wslStatus.ok;
+      const registration = registrations.get(distro);
+      const unavailable =
+        registration?.missingFiles ||
+        (String(registration?.version ?? row?.at(-1)) === '2' && !wslStatus.ok);
       shells.push({
         id: `wsl:${distro}`,
         name: `${distro} — Local Bash`,
         executable: wsl,
         args: ['--distribution', distro, '--cd', '~', '--exec', 'bash', '-l'],
         available: !unavailable,
-        reason: unavailable
-          ? `WSL 2 needs setup. ${
-              wslStatus.output
-                .split(/\r?\n/)
-                .filter((line) => line.trim())
-                .at(-1)
-                ?.trim()
-                .slice(0, 220) ?? 'Run wsl --status in Windows PowerShell for details.'
-            } After repairing WSL, refresh Settings.`
-          : undefined,
+        reason: registration?.missingFiles
+          ? `The registered ${distro} distribution files are missing. Repair or reinstall this distribution using Windows WSL tools, then refresh Settings. MyTerminal does not change Windows features.`
+          : unavailable
+            ? `WSL 2 needs setup. ${
+                wslStatus.output
+                  .split(/\r?\n/)
+                  .filter((line) => line.trim())
+                  .at(-1)
+                  ?.trim()
+                  .slice(0, 220) ?? 'Run wsl --status in Windows PowerShell for details.'
+              } After repairing WSL, refresh Settings.`
+            : undefined,
       });
     }
   else
