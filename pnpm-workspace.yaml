@@ -1,0 +1,10 @@
+packages:
+  - .
+allowBuilds:
+  electron: true
+  esbuild: true
+  node-pty: true
+  ssh2: true
+  cpu-features: true
+  electron-winstaller: true
+nodeLinker: hoisted

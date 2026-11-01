@@ -1,0 +1,184 @@
+Build a complete standalone Windows desktop application for local terminals and remote SSH sessions. Use "MyTerminal" as a temporary app name, keeping it easy to rename.
+
+This must be a working, installable terminal application. Implement real interactive shells and SSH connections, not simulated output or a UI mockup. Inspect the repository and follow applicable project instructions first. If the repository is empty, scaffold the application. Make reasonable implementation decisions and continue through development, validation, and packaging.
+
+1. PLATFORM AND IMPLEMENTATION
+
+Target Windows 10/11 on x64. Prefer Electron, React, TypeScript, xterm.js, node-pty for local shells, and ssh2 for remote connections. Use current compatible stable releases and a lockfile. If an existing project already has a suitable desktop stack, retain it and explain any meaningful departures.
+
+Use actual pseudoterminals. Keep shell processes and SSH connections outside the renderer, with a narrow, validated IPC interface. Handle native dependency rebuilding and packaging so the distributed application can open real terminals.
+
+2. WINDOW LAYOUT
+
+Use a compact terminal-focused interface with a dark theme, readable monospace text, and conventional Windows window controls.
+
+The layout, from top to bottom, is:
+- Menu bar: File, Edit, View, Help.
+- Tab strip, with a plus-sign tab immediately after the last terminal tab.
+- The selected tab's own connection/status bar.
+- That tab's terminal, filling the remaining space.
+
+There must be no shared connection/status bar under the menu. Each tab owns its own connection bar and session state.
+
+Tabs must be selectable, closable, and renameable. Include a shell icon and an identifiable title, such as "PowerShell", "Ubuntu - Local", or "RunPod - Terminal 1". Keep the plus button reachable when many tabs are open. Switching tabs must preserve terminal processes, output, scroll position, and connection state.
+
+Open a local PowerShell tab by default. The application must remain usable without internet access, saved connections, or a remote server.
+
+3. CREATING TERMINAL TABS
+
+Clicking the plus-sign tab opens a dropdown grouped into Local and Remote choices.
+
+Local choices:
+- PowerShell 7, when installed.
+- Windows PowerShell.
+- Command Prompt.
+- Bash through installed WSL distributions, with a distribution selector.
+- Git Bash, when installed.
+
+Remote choices:
+- New SSH connection.
+- Saved SSH connection profiles.
+
+Prefer PowerShell 7 for the default tab and fall back to Windows PowerShell. Discover installed shells reliably and permit correcting executable paths in settings. Missing optional shells must be disabled with a short explanation and setup guidance. Do not automatically install software or change Windows features.
+
+Local PowerShell, Command Prompt, WSL, and Git Bash must operate independently of any remote connection. Every local tab gets its own process and current working directory.
+
+Bash is a shell, while SSH is the connection method. A remote tab should start the server's default interactive shell. Do not assume every remote system runs Bash. Allow an explicit remote shell selection when supported, with a useful error if it is unavailable.
+
+4. PER-TAB CONNECTION BAR
+
+Every tab has a compact bar directly above its terminal.
+
+On the far left, place a Connect button that opens a connection dialog for that specific tab. The bar also displays:
+- Local or Remote.
+- Local shell type, or remote profile name and username@host:port.
+- Relevant remote state: Connecting, Connected, Disconnected, Reconnecting, or Error.
+- Disconnect and Reconnect controls when applicable.
+
+Use text and icons as well as color. Make it obvious which machine receives typed commands. Do not display Local tabs as having an SSH connection.
+
+Different tabs may connect to completely different hosts simultaneously. Several tabs may use the same saved profile, but each must have its own independent shell session. Prefer a separate SSH client connection per remote tab for the initial implementation.
+
+Connecting, disconnecting, or closing one tab must not interrupt another tab.
+
+5. CONNECTION DIALOG AND SAVED PROFILES
+
+Provide a dialog with:
+- Saved profile selector.
+- Profile display name.
+- Hostname or IP address.
+- SSH port, defaulting to 22.
+- Username.
+- Authentication using an SSH private key file, including a passphrase when needed, or a password.
+- Browse control for selecting a key file.
+- Save profile option.
+- Connect and Cancel buttons.
+
+Saved profiles must be reusable from every tab. Selecting a saved profile should fill its settings so connecting is a single action. Support creating, editing, renaming, and deleting profiles through File > Manage Connections. Deleting a profile removes its saved configuration without implicitly terminating already open sessions.
+
+Support standard SSH servers and RunPod SSH connection details, including custom ports and RunPod's proxied SSH usernames. Do not hardcode a host, assume the username is root, or require a RunPod account integration.
+
+Provide an optional "Connect automatically on application startup" setting per profile, off by default. When enabled, open one remote tab for that profile at startup. Failures must leave local terminals usable. Secure authentication prompts may still be necessary when credentials are unavailable.
+
+Saved profiles are configuration, not live sessions. Editing a profile affects future connections; it must not silently retarget a running terminal.
+
+6. SESSION LIFECYCLE
+
+A tab's Connect button applies to that tab. Connecting a local tab to a remote host, or changing an existing remote tab's destination, replaces its terminal session only after an explicit confirmation. A failed connection attempt must not destroy the working session. Clearly mark any transition between destinations, and never forward buffered input from the old session into the new one.
+
+Keep background tabs running and receiving output. Use SSH keepalives and sensible timeouts to maintain connected tabs while the app is open.
+
+Closing a tab ends only its local process or remote session. Warn before ending active foreground work where detection is reliable. When activity cannot be determined, use a conservative, configurable session-close confirmation. Do not kill unrelated processes or other tabs.
+
+Disconnecting a remote tab preserves its existing output as read-only. Offer Reconnect and Start Local Terminal, with a shell selector for the latter. A connection failure must never silently turn subsequent input into local commands.
+
+After a network interruption, show the real disconnected state and provide reconnect. Reconnecting creates a fresh remote shell unless session persistence has actually been implemented. Do not claim an old shell or its processes were recovered merely because SSH connected again. Never automatically replay previous commands.
+
+When a shell exits, retain its output and exit status with Restart and Close options. Clean up owned processes, sockets, and listeners when sessions end or the app closes. Closing this client must not issue commands to stop or terminate a RunPod instance.
+
+7. TERMINAL BEHAVIOR
+
+Support normal interactive terminal use:
+- ANSI colors and cursor movement.
+- Unicode input and output.
+- Keyboard input, command history, tab completion, and control keys.
+- Ctrl+C interrupt behavior.
+- Selection, copy, paste, and scrollback.
+- Resizing, including local PTY and remote PTY size updates.
+- Interactive programs such as editors and command-line monitors.
+- Search within terminal output.
+- Adjustable font size and configurable scrollback limits.
+
+Provide Ctrl+Shift+C for copy, Ctrl+Shift+V for paste, Ctrl+Shift+T for new tab, and a close-tab shortcut. Preserve shortcuts that belong to the shell. Support bracketed paste where available and a configurable multiline-paste confirmation.
+
+Terminal output must stream without freezing the interface. Keep background buffers bounded and use appropriate flow control. Resizing or switching tabs must not recreate terminal sessions.
+
+8. MENUS AND SETTINGS
+
+All visible menu actions must work.
+
+File:
+- New Tab.
+- Connect for the active tab.
+- Manage Connections.
+- Close Tab.
+- Settings.
+- Exit.
+
+Edit:
+- Copy.
+- Paste.
+- Select All.
+- Find.
+- Clear Scrollback, affecting only displayed history.
+
+View:
+- Increase, decrease, and reset terminal font size.
+- Fullscreen.
+
+Help:
+- Keyboard Shortcuts.
+- Local shell setup and SSH connection help.
+- About.
+
+Persist connection profiles, font preferences, scrollback settings, and window size/position in the user's application-data directory. Use versioned, atomic configuration writes and recover gracefully from invalid settings. Keep data out of the source tree and installation directory.
+
+9. SECURITY DEFAULTS
+
+Run with normal user permissions by default. Routine terminal use must not require running the entire application as Administrator.
+
+Respect existing Windows protections and shell policies. Do not automatically change PowerShell execution policy, add execution-policy bypass flags, disable Defender, add broad antivirus exclusions, or open inbound firewall ports.
+
+Protect saved credentials using Windows-protected secret storage. Store private key file references instead of copying private keys into configuration. Never persist passwords, passphrases, or key material in plaintext settings, logs, or source code. Keep stored secrets in the privileged backend; allow only transient secret entry through authentication dialogs and clear it promptly. Never send saved secrets back to the renderer. Saving secrets must be explicit and optional.
+
+Verify SSH host keys. Show a fingerprint for a previously unknown host and require explicit trust. Unexpected host-key changes must stop automatic connection and require deliberate review. Do not silently accept every key.
+
+Use Electron context isolation, disable renderer Node integration, validate IPC messages and session ownership, and render terminal output as data. Do not execute terminal output as HTML or application code. Disable unsolicited remote clipboard writes by default.
+
+Preserve normal user control over commands. Connection forms must not execute arbitrary pasted text as local shell commands. Do not add command execution through a network-accessible control endpoint.
+
+10. VALIDATION AND DELIVERY
+
+Build the application end to end. Do not stop after scaffolding or presenting an implementation plan.
+
+Verify the following behavior:
+- Start with no network and open a functioning local PowerShell tab.
+- Open multiple local tabs, change directories independently, and switch tabs without restarting them.
+- Detect installed WSL and Git Bash options, and explain unavailable shells.
+- Create and reuse a saved SSH profile across app restarts.
+- Maintain tabs connected to two different hosts.
+- Maintain two independent terminal sessions on the same host.
+- Disconnect or close one remote tab while others continue working.
+- Handle wrong credentials, unreachable hosts, rejected or changed host keys, and interrupted connections.
+- Keep an existing session usable after a failed attempt to replace its destination.
+- Resize terminals, interrupt commands, paste text, and run interactive programs.
+- Keep credentials out of persisted plaintext and diagnostic logs.
+- Launch the packaged Windows build and successfully start a real shell.
+
+Add focused automated tests for connection/session lifecycle, tab isolation, profile persistence, and relevant security boundaries. Use a controlled SSH test server where practical. Distinguish actual integration tests from mocks.
+
+Run appropriate type checks, tests, and production builds. If your environment cannot perform Windows desktop or real RunPod testing, explicitly report what remains unverified and provide a short manual test checklist. Never claim a packaged Windows app was exercised when it was only built.
+
+Deliver the source, lockfile, reproducible development and packaging commands, a Windows installer or portable executable when the environment supports producing one, and a concise README covering setup, local shells, SSH profiles, credential handling, and known limitations.
+
+Keep the scope focused on making this standalone terminal application dependable and usable.

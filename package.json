@@ -1,0 +1,92 @@
+{
+  "name": "myterminal",
+  "productName": "MyTerminal",
+  "version": "0.1.0",
+  "description": "Independent local terminals and secure SSH sessions for Windows",
+  "author": "Impshial",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/main/index.cjs",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "start": "electron .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:desktop": "node scripts/desktop-test.mjs",
+    "package": "pnpm build && pnpm verify:native && electron-builder --win nsis portable --x64",
+    "package:dir": "pnpm build && pnpm verify:native && electron-builder --win --x64 --dir",
+    "rebuild": "electron-rebuild -f -w node-pty",
+    "verify:native": "node scripts/verify-native.mjs",
+    "format": "prettier --write ."
+  },
+  "build": {
+    "appId": "com.impshial.myterminal",
+    "productName": "MyTerminal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json",
+      "assets/**/*",
+      "!node_modules/node-pty/prebuilds/darwin-*/**/*",
+      "!node_modules/node-pty/prebuilds/win32-arm64/**/*",
+      "!node_modules/node-pty/third_party/conpty/*/win10-arm64/**/*",
+      "!node_modules/node-pty/**/*.pdb",
+      "!node_modules/node-pty/build/!(Release)/**/*"
+    ],
+    "asarUnpack": [
+      "node_modules/node-pty/**/*"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "signAndEditExecutable": true,
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "MyTerminal",
+      "allowElevation": false,
+      "artifactName": "MyTerminal-${version}-${arch}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "MyTerminal-${version}-${arch}-portable.${ext}"
+    }
+  },
+  "dependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/addon-search": "^0.16.0",
+    "@xterm/addon-unicode11": "^0.9.0",
+    "@xterm/xterm": "^6.0.0",
+    "node-pty": "^1.1.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "ssh2": "^1.17.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/ssh2": "^1.15.6",
+    "@vitejs/plugin-react": "^6.1.2",
+    "electron": "^45.2.1",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.1",
+    "prettier": "^3.9.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  },
+  "type": "module"
+}

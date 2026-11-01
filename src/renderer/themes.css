@@ -1,0 +1,205 @@
+/* App chrome and terminal appearance are intentionally independent. */
+:root {
+  --terminal-background: #012456;
+  --terminal-scrollbar: #52739c;
+}
+:root[data-terminal-theme='command'] {
+  --terminal-background: #000000;
+  --terminal-scrollbar: #515151;
+}
+:root[data-terminal-theme='retro'] {
+  --terminal-background: #000000;
+  --terminal-scrollbar: #185b2a;
+}
+.terminal-host {
+  background: var(--terminal-background);
+}
+.xterm-viewport {
+  scrollbar-color: var(--terminal-scrollbar) var(--terminal-background);
+}
+:root[data-app-theme='light'] {
+  color-scheme: light;
+  color: #25343e;
+  background: #f2f5f7;
+}
+[data-app-theme='light'] button {
+  color: #31454f;
+  background: #eef2f4;
+  border-color: #c4d0d8;
+}
+[data-app-theme='light'] button:hover {
+  background: #dde7eb;
+  border-color: #97afb8;
+}
+[data-app-theme='light'] .primary {
+  background: #226d4e;
+  border-color: #226d4e;
+  color: #fff;
+}
+[data-app-theme='light'] .primary:hover {
+  background: #185c40;
+}
+[data-app-theme='light'] .tab-strip {
+  background: #e3eaee;
+  border-color: #b9c8d0;
+}
+[data-app-theme='light'] .tab {
+  background: #e3eaee;
+}
+[data-app-theme='light'] .tab.active {
+  background: #f6f8fa;
+  border-color: #c4d0d8;
+}
+[data-app-theme='light'] .tab.active:before {
+  background: #25724f;
+}
+[data-app-theme='light'] .tab-select,
+[data-app-theme='light'] .tab-close,
+[data-app-theme='light'] .new-tab,
+[data-app-theme='light'] .icon-button {
+  background: transparent;
+  color: #45616e;
+}
+[data-app-theme='light'] .tab.active .tab-select {
+  color: #203842;
+}
+[data-app-theme='light'] .shell-icon {
+  color: #24618b;
+}
+[data-app-theme='light'] .shell-icon.remote {
+  color: #70489b;
+}
+[data-app-theme='light'] .brand {
+  color: #647c89;
+}
+[data-app-theme='light'] .connection-bar {
+  background: #f6f8fa;
+  border-color: #d1dce2;
+}
+[data-app-theme='light'] .connect-button {
+  background: #e1eee6;
+  color: #256b4b;
+  border-color: #a7cab6;
+}
+[data-app-theme='light'] .location-badge {
+  background: #dcebf5;
+  color: #2e5f7e;
+}
+[data-app-theme='light'] .location-badge.remote {
+  background: #ece3f5;
+  color: #6c4b88;
+}
+[data-app-theme='light'] .destination {
+  color: #405d6e;
+}
+[data-app-theme='light'] .session-state {
+  color: #526c79;
+}
+[data-app-theme='light'] .running .status-dot,
+[data-app-theme='light'] .connected .status-dot {
+  background: #287d54;
+}
+[data-app-theme='light'] .app-footer {
+  background: #edf2f5;
+  border-color: #c9d6dd;
+  color: #607985;
+}
+[data-app-theme='light'] .new-menu,
+[data-app-theme='light'] .modal {
+  background: #f8fafb;
+  border-color: #bfced6;
+  color: #243d49;
+}
+[data-app-theme='light'] .new-menu > button,
+[data-app-theme='light'] .menu-footer button {
+  background: transparent;
+}
+[data-app-theme='light'] .new-menu > button:hover {
+  background: #e7eef2;
+}
+[data-app-theme='light'] .new-menu h2,
+[data-app-theme='light'] .new-menu small,
+[data-app-theme='light'] .hint,
+[data-app-theme='light'] .modal header p {
+  color: #637e8d;
+}
+[data-app-theme='light'] .menu-icon {
+  color: #337b57;
+}
+[data-app-theme='light'] .menu-footer,
+[data-app-theme='light'] .modal footer,
+[data-app-theme='light'] .modal details,
+[data-app-theme='light'] .profile-row,
+[data-app-theme='light'] .shortcuts > div {
+  border-color: #d2dde3;
+}
+[data-app-theme='light'] .modal label,
+[data-app-theme='light'] .modal h2,
+[data-app-theme='light'] .help-content h2 {
+  color: #324f5e;
+}
+[data-app-theme='light'] input,
+[data-app-theme='light'] select {
+  background: #fff;
+  color: #1d3542;
+  border-color: #bdcdd7;
+}
+[data-app-theme='light'] .segmented {
+  background: #e8eef2;
+  border-color: #cad6de;
+}
+[data-app-theme='light'] .segmented button {
+  background: transparent;
+  color: #567180;
+}
+[data-app-theme='light'] .segmented .selected {
+  background: #fff;
+  color: #236544;
+  box-shadow: 0 1px 4px #243b4b18;
+}
+[data-app-theme='light'] .check,
+[data-app-theme='light'] .help-content {
+  color: #4c6876;
+}
+[data-app-theme='light'] .security-note {
+  color: #4d7560;
+}
+[data-app-theme='light'] .find-bar,
+[data-app-theme='light'] .ended {
+  background: #ecf2f5;
+  border-color: #c5d4dc;
+  color: #4b6775;
+}
+[data-app-theme='light'] .empty-workspace {
+  background: #f2f5f7;
+  color: #627f8f;
+}
+[data-app-theme='light'] .empty-workspace h1 {
+  color: #274551;
+}
+[data-app-theme='light'] .empty-symbol {
+  background: #dfefe5;
+  color: #367451;
+  border-color: #adcdbb;
+}
+[data-app-theme='light'] .shortcuts kbd {
+  background: #e9eff3;
+  border-color: #c5d5de;
+  color: #355362;
+}
+[data-app-theme='light'] .session-error,
+[data-app-theme='light'] .error {
+  background: #fff0f0;
+  color: #933b48;
+  border-color: #e6bac1;
+}
+[data-app-theme='light'] .transition {
+  background: #e0f0e6;
+  color: #2d6c49;
+  border-color: #b3d0bd;
+}
+[data-app-theme='light'] .notice {
+  background: #fff6e2;
+  color: #735c20;
+  border-color: #e4d1a6;
+}
