@@ -81,6 +81,8 @@ node scripts/desktop-test.mjs --packaged
 
 Desktop tests launch hidden windows, use isolated user-data directories under ignored `test-results/`, and generate screenshots. They use actual Windows PTYs and a loopback-only SSH protocol fixture. Native confirmation dialogs are stubbed in that test process. Unit lifecycle tests inject fake transports; they are not SSH integration tests.
 
+Use `--no-screenshots` for functional desktop checks on headless CI or while heavy packaging work is running; hidden-window capture can stall under those conditions. This skips only image capture, not terminal, appearance, SSH, or security checks.
+
 If a development environment rewrites ACLs and Electron reports that its runtime directory is inaccessible to AppContainer processes, run validation outside that tool's filesystem sandbox. Preserve Electron's renderer sandbox. Ordinary installed Windows applications do not depend on Codex.
 
 ## Architecture and storage

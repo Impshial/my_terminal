@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto';
 import { startSSHFixture } from './ssh-fixture.mjs';
 
 const packaged = process.argv.includes('--packaged');
+const screenshots = !process.argv.includes('--no-screenshots');
 const artifacts = path.resolve('test-results', packaged ? 'packaged' : 'desktop');
 await mkdir(artifacts, { recursive: true });
 const userData = path.join(artifacts, `profile-${randomUUID()}`);
@@ -188,7 +189,8 @@ try {
   }
   await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setSize(1050, 700));
   await page.waitForTimeout(200);
-  await page.screenshot({ path: path.join(artifacts, 'dark-powershell.png') });
+  if (screenshots)
+    await page.screenshot({ path: path.join(artifacts, 'dark-powershell.png'), timeout: 60000 });
   const menuClick = async (label, checked) =>
     app.evaluate(
       ({ Menu, BrowserWindow }, args) => {
@@ -205,7 +207,8 @@ try {
     await page.evaluate(() => document.documentElement.dataset.terminalTheme),
     'powershell',
   );
-  await page.screenshot({ path: path.join(artifacts, 'light-powershell.png') });
+  if (screenshots)
+    await page.screenshot({ path: path.join(artifacts, 'light-powershell.png'), timeout: 60000 });
   for (const [label, theme] of [
     ['Command Window', 'command'],
     ['1970’s Screen', 'retro'],
@@ -223,7 +226,8 @@ try {
       theme,
     );
     assert.equal(await page.evaluate(() => document.documentElement.dataset.appTheme), 'light');
-    await page.screenshot({ path: path.join(artifacts, `light-${theme}.png`) });
+    if (screenshots)
+      await page.screenshot({ path: path.join(artifacts, `light-${theme}.png`), timeout: 60000 });
   }
   checks.push(
     'View menu light toggle and all three checked Terminal Mode choices operate independently',
@@ -401,7 +405,10 @@ try {
   if (app) {
     const pages = app.windows();
     if (pages[0]) {
-      await pages[0].screenshot({ path: path.join(artifacts, 'failure.png') }).catch(() => {});
+      if (screenshots)
+        await pages[0]
+          .screenshot({ path: path.join(artifacts, 'failure.png'), timeout: 10000 })
+          .catch(() => {});
       console.error(
         (
           await pages[0]

@@ -21,7 +21,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm package
-      - run: node scripts/desktop-test.mjs --packaged
+      - run: node scripts/desktop-test.mjs --packaged --no-screenshots
       - uses: actions/upload-artifact@v4
         with:
           name: MyTerminal-Windows-x64
