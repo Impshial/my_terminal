@@ -144,5 +144,13 @@ try {
   );
 } finally {
   await writeFile(path.join(artifacts, 'results.json'), JSON.stringify(results, null, 2));
-  if (app) await app.evaluate(({ app }) => app.exit(0)).catch(() => {});
+  if (app) {
+    // Let the normal close handler dispose the real PTY before Electron shuts down.
+    await app
+      .evaluate(({ dialog }) => {
+        dialog.showMessageBox = async () => ({ response: 1, checkboxChecked: false });
+      })
+      .catch(() => {});
+    await app.close();
+  }
 }
