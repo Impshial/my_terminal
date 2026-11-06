@@ -543,7 +543,7 @@ export function App() {
       {dialog && ['help', 'shortcuts', 'about'].includes(dialog.kind) && (
         <HelpDialog
           kind={dialog.kind as 'help' | 'shortcuts' | 'about'}
-          version={bootstrap?.version ?? '0.1.0'}
+          version={bootstrap?.version ?? '0.1.1'}
           close={closeDialog}
         />
       )}

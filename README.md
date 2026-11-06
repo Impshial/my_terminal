@@ -6,8 +6,8 @@ A standalone Windows 10/11 x64 desktop app with real local terminals and SSH ses
 
 Build artifacts are written to `release/`:
 
-- `MyTerminal-0.1.0-x64-setup.exe`: per-user installer with a Start menu shortcut and optional desktop shortcut.
-- `MyTerminal-0.1.0-x64-portable.exe`: portable launcher.
+- `MyTerminal-0.1.1-x64-setup.exe`: per-user installer with a Start menu shortcut and optional desktop shortcut.
+- `MyTerminal-0.1.1-x64-portable.exe`: portable launcher.
 - `win-unpacked/MyTerminal.exe`: unpacked application, with its adjacent runtime files.
 
 The app runs as your normal Windows user. This initial build is unsigned; Windows may show publisher/reputation prompts. Do not disable Windows protections. The installer and portable launcher do not require an external terminal or a Node.js installation.
@@ -73,8 +73,10 @@ pnpm dev
 
 pnpm build
 pnpm test:desktop
+pnpm test:layout
 pnpm package
 node scripts/desktop-test.mjs --packaged
+node scripts/layout-test.mjs --packaged
 ```
 
 `pnpm dev` builds and opens the desktop app; restart after source edits. `pnpm verify:native` loads node-pty in the exact Electron runtime. This Windows x64 build uses node-pty 1.1's shipped, ABI-stable Node-API binaries, so packaging skips unnecessary source rebuilds and unpacks its native binaries and ConPTY helpers. `pnpm rebuild` is an optional source rebuild and needs the complete C++/Spectre toolchain. SSH's native acceleration is optional; ssh2 retains its JavaScript fallback.

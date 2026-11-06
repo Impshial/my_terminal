@@ -1,7 +1,7 @@
 {
   "name": "myterminal",
   "productName": "MyTerminal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Independent local terminals and secure SSH sessions for Windows",
   "author": "Impshial",
   "license": "MIT",
@@ -15,6 +15,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:desktop": "node scripts/desktop-test.mjs",
+    "test:layout": "node scripts/layout-test.mjs",
     "package": "pnpm build && pnpm verify:native && electron-builder --win nsis portable --x64",
     "package:dir": "pnpm build && pnpm verify:native && electron-builder --win --x64 --dir",
     "rebuild": "electron-rebuild -f -w node-pty",

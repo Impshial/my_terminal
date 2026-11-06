@@ -342,6 +342,8 @@ main {
   color: #a1b3be;
 }
 .terminal-host {
+  /* FitAddon reads the computed size as usable space, excluding this outer padding. */
+  box-sizing: content-box;
   flex: 1;
   min-height: 0;
   overflow: hidden;
